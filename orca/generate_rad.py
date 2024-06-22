@@ -47,7 +47,22 @@ def write(filename, atoms, type_calc):
             file.write(textwrap.dedent('''\
                 !B3LYP DEF2-SVP
                 ! LargePrint PrintBasis KeepDens
-                % maxcore 3000
+                %maxcore 12000
+                % OUTPUT
+                Print[ P_Overlap ] 1        # overlap matrix
+                Print[ P_Iter_F ] 1         # Fock matrix, for every iteration
+                END
+            '''))
+            write_pos(_charge=0,_multiplicity=2)
+    elif(type_calc =='B3LYP-pvdz-parallel'):
+        with open(filename,'w') as file:
+            file.write(textwrap.dedent('''\
+                !B3LYP DEF2-SVP
+                ! LargePrint PrintBasis KeepDens
+                %maxcore 12000
+                %pal
+                nprocs 10
+                end
                 % OUTPUT
                 Print[ P_Overlap ] 1        # overlap matrix
                 Print[ P_Iter_F ] 1         # Fock matrix, for every iteration
@@ -108,8 +123,8 @@ print('dbg',folder_names)
 for raw_file in files:
     file = str(raw_file[1:])
     print(file)
-    type_dict = {'pvdz':'ROHF-pvdz'}
-    for folder in ['pvdz']:
+    type_dict = {'B3LYP-pvdz':'B3LYP-pvdz-parallel'}
+    for folder in ['B3LYP-pvdz']:
         #os.makedirs(route+file[:-5]+'/pvdz', exist_ok=True)
         #os.makedirs(route+file[:-5]+'/pvtz', exist_ok=True)
         
