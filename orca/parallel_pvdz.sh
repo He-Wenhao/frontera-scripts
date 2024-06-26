@@ -39,7 +39,7 @@ else
     #echo 'should directory:'$4
     #echo 'should host name:'$3
     #copy input file to node specific /tmp
-    ssh $3 "echo 'start copy'; echo 'hostname:'\$(hostname); cd $4; echo 'directory:'$(pwd); rm /tmp/run.inp ;cp run.inp /tmp/run.inp; rm /tmp/run.gbw /tmp/*.tmp*"
+    # ssh $3 "echo 'start copy'; echo 'hostname:'\$(hostname); cd $4; echo 'directory:'$(pwd); rm /tmp/run.inp ;cp run.inp /tmp/run.inp; rm /tmp/run.gbw /tmp/*.tmp*"
     # echo 'copy completed'
     #generate machine
     rm my_hostfile
@@ -47,7 +47,7 @@ else
     do
         echo $3 >> my_hostfile
     done
-    ssh $3 "source ~/.bash_profile; export OMPI_MCA_btl=^openib; cd $4; /work2/08491/th1543/orca/orca /tmp/run.inp > log '-machinefile my_hostfile -v';echo 'disk storage'\$( du -sh /tmp 2>/dev/null)"
+    ssh $3 "source ~/.bash_profile; export OMPI_MCA_btl=^openib; cd $4; rm /tmp/run.gbw /tmp/*.tmp* /tmp/run.inp /tmp/run.ges; cp run.inp /tmp/run.inp; /work2/08491/th1543/orca/orca /tmp/run.inp > /tmp/log '-machinefile my_hostfile -v'; cp /tmp/log log; echo 'disk storage'\$( du -sh /tmp 2>/dev/null)"
 fi
 
 sub_duration=$(( SECONDS - sub_start ))
@@ -113,7 +113,9 @@ do
         #bash run_orca.sh &
         # Echo the result
         echo "Number of background jobs: $(jobs -l | wc -l)"
-        sleep 1
+        if [ "$(jobs -l | wc -l)" -ne 1 ]; then
+            sleep 1
+        fi
         cd ..
         cd ..
         cd ..
