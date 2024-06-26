@@ -6,7 +6,7 @@ while ! grep -q "done" log-$job_id; do
     
     # Example: Echo a message
     echo 'self submited'
-    output=$(sbatch -J st$(basename $(pwd)) self_pvtz_continue.sh)
+    output=$(sbatch operate_all.sh)
     echo $output
     job_id=$(echo $output | grep -oP "Submitted batch job \K[0-9]+")
     for i in {1..30}; do
