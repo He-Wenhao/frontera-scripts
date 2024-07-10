@@ -11,7 +11,8 @@ import multiprocessing as mp;
 import json;
 import shutil
 from multiprocessing import Pool
-
+import random
+import json
 
 def delete_second_line(filename):
     # Read the contents of the file
@@ -90,7 +91,7 @@ def write_orca_xyz(filename, xyzname ,type_calc):
             file.write('end\n');
             file.write('! LargePrint KeepDens\n');
             file.write('%MDCI\n');
-	    file.write('maxiter 200\n');
+            file.write('maxiter 200\n');
             file.write('END\n');
     
             file.write('%ELPROP\n');
@@ -182,11 +183,14 @@ def worker_rand(file_info):
     print('config:', file)
 
     write_orca_xyz(os.path.join(task, 'run.inp'), file, type_calc)
-    shutil.copy(os.path.join('QM9_rand', file), task)
+    shutil.copy(os.path.join('QM9', file), task)
     delete_second_line(os.path.join(task, file))
 
 def make_all_orca_inp_rand(type_calc, path='orca'):
-    files = os.listdir('QM9_rand/')
+    # Open the JSON file in read mode
+    with open('random_namelist.json', 'r') as file:
+        # Load the list from the JSON file
+        files = json.load(file)
     print('#file:',len(files))
     #files = files[0:3]
     if not os.path.exists(path):
@@ -197,42 +201,22 @@ def make_all_orca_inp_rand(type_calc, path='orca'):
         file_info = (type_calc, path, file, ind)
         worker_rand(file_info)
 
-# we put every 1000 datas in a batch
-def worker(file_info):
-    type_calc, path, file = file_info
-    ind = int(file[-10:-4])
-    batch_ind = ind // 1000
-    name = os.path.join(path, str(batch_ind), str(ind%1000))
-    task = os.path.join(name, type_calc)
-
-    if not os.path.exists(name):
-        os.makedirs(name, exist_ok=True)
-    if not os.path.exists(task):
-        os.makedirs(task, exist_ok=True)
-    print('config:', file)
-
-    write_orca_xyz(os.path.join(task, 'run.inp'), file, type_calc)
-    shutil.copy(os.path.join('QM9', file), task)
-    delete_second_line(os.path.join(task, file))
-
-def make_all_orca_inp(type_calc, path='orca'):
+def randomize_namelist():
     files = os.listdir('QM9/')
-    print('#file:',len(files))
-    #files = files[0:3]
-    if not os.path.exists(path):
-        os.makedirs(path)
+    print(type(files))
+    random.shuffle(files)
+    random_files = files
+    print(len(random_files))
+    # Open a file in write mode
+    with open('random_namelist.json', 'w') as file:
+        # Write the list to the file in JSON format
+        json.dump(random_files, file)
 
-    # Create tuples of arguments to pass to the worker function
-    file_info_list = [(type_calc, path, file) for file in files]
-
-    # Set up a pool of processes
-    with Pool() as pool:
-        # map the worker function to the files
-        pool.map(worker, file_info_list)
 if __name__ == '__main__':
-    #make_all_orca_inp_rand(type_calc = 'pvtz_DLPNO_CCSDt')
-    #make_all_orca_inp_rand(type_calc = 'pvdz_DLPNO_CCSDt')
-    #make_all_orca_inp_rand(type_calc = 'pvdz_CCSDt')
-    #make_all_orca_inp_rand(type_calc = 'EOM')
-    #make_all_orca_inp_rand(type_calc = 'polar')
+    #randomize_namelist()
+    make_all_orca_inp_rand(type_calc = 'pvtz_DLPNO_CCSDt')
+    make_all_orca_inp_rand(type_calc = 'pvdz_DLPNO_CCSDt')
+    make_all_orca_inp_rand(type_calc = 'pvdz_CCSDt')
+    make_all_orca_inp_rand(type_calc = 'EOM')
+    make_all_orca_inp_rand(type_calc = 'polar')
     make_all_orca_inp_rand(type_calc = 'bp86')

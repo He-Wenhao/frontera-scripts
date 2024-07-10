@@ -41,7 +41,7 @@ else
     do
         echo $3 >> my_hostfile
     done
-    ssh $3 "  source ~/.bashrc; cd $4; rm /tmp/run.gbw /tmp/*.tmp* /tmp/run.inp /tmp/run.ges; cp run.inp /tmp/run.inp; /work2/09730/whe1/my_packages/orca/orca /tmp/run.inp > /tmp/log '-machinefile my_hostfile -v'; cp /tmp/log log; cp /tmp/run.densities run.densities; echo 'disk storage'\$( du -sh /tmp 2>/dev/null)"
+    ssh $3 "  source ~/.bashrc; cd $4; rm /tmp/run.gbw /tmp/*.tmp* /tmp/run.inp /tmp/run.ges; cp run.inp /tmp/run.inp; /work2/09730/whe1/my_packages/orca/orca /tmp/run.inp > /tmp/log '-machinefile my_hostfile -v'; cp /tmp/log log; cp /tmp/run.densities run.densities;cp /tmp/run.properties run.properties; echo 'disk storage'\$( du -sh /tmp 2>/dev/null)"
 fi
 
 sub_duration=$(( SECONDS - sub_start ))
