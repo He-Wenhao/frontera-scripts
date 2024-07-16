@@ -48,7 +48,7 @@ def write_orca_xyz(filename, xyzname ,type_calc):
             file.write('! LargePrint KeepDens\n');
             file.write('%MDCI\n');
             file.write('maxiter 200\n');
-            file.write('Density linearized');
+            file.write('Density linearized\n');
             file.write('END\n');
     
             file.write('%ELPROP\n');
@@ -69,7 +69,7 @@ def write_orca_xyz(filename, xyzname ,type_calc):
             file.write('end\n');
             file.write('! LargePrint KeepDens\n');
             file.write('%MDCI\n');
-            file.write('Density linearized');
+            file.write('Density linearized\n');
             file.write('maxiter 200\n');
             file.write('END\n');
     
@@ -197,9 +197,13 @@ def make_all_orca_inp_rand(type_calc, path='orca'):
         os.makedirs(path)
 
     # Create tuples of arguments to pass to the worker function
+    file_info_l = []
     for ind, file in enumerate(files):
         file_info = (type_calc, path, file, ind)
-        worker_rand(file_info)
+        file_info_l.append(file_info)
+    with Pool() as pool:
+        # map the worker function to the files
+        pool.map(worker_rand, file_info_l)
 
 def randomize_namelist():
     files = os.listdir('QM9/')
@@ -216,7 +220,7 @@ if __name__ == '__main__':
     #randomize_namelist()
     make_all_orca_inp_rand(type_calc = 'pvtz_DLPNO_CCSDt')
     make_all_orca_inp_rand(type_calc = 'pvdz_DLPNO_CCSDt')
-    make_all_orca_inp_rand(type_calc = 'pvdz_CCSDt')
-    make_all_orca_inp_rand(type_calc = 'EOM')
-    make_all_orca_inp_rand(type_calc = 'polar')
-    make_all_orca_inp_rand(type_calc = 'bp86')
+    #make_all_orca_inp_rand(type_calc = 'pvdz_CCSDt')
+    #make_all_orca_inp_rand(type_calc = 'EOM')
+    #make_all_orca_inp_rand(type_calc = 'polar')
+    #make_all_orca_inp_rand(type_calc = 'bp86')

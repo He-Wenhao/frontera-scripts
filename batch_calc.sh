@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH -o log-%j
-#SBATCH -N 20
+#SBATCH -N 64
 #SBATCH --ntasks-per-node 10
-#SBATCH -A DMR23002
+#SBATCH -A DMR21001
 #SBATCH -p development
-#SBATCH -t 2:00:00        # Run time (hh:mm:ss)
+#SBATCH -t 48:00:00        # Run time (hh:mm:ss)
 
 #sbatch -J pt$(basename $(pwd)) parallel_pvtz_plus.sh
-n_proc=20
+n_proc=64
 core_per_task=10
 slot_free=()
 pids=()
