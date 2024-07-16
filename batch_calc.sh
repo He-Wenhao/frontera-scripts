@@ -12,7 +12,7 @@ core_per_task=10
 slot_free=()
 pids=()
 
-method_folder='EOM'
+method_folder=$1
 
 for ((i=0; i<$n_proc; i++)); do
     slot_free[$i]=1
@@ -54,7 +54,7 @@ EOF
 
 wait_flag=0
 
-for i in {0..99}
+for i in {0..999}
 do
     stop_flag=1
     slot_id=0
