@@ -24,7 +24,8 @@ run_one_calc pvdz_CCSDt
 run_one_calc pvdz_DLPNO_CCSDt
 run_one_calc pvtz_DLPNO_CCSDt
 
-
+run_one_calc pvdz_DLPNO_CCSD
+run_one_calc pvtz_DLPNO_CCSD
 
 
 
