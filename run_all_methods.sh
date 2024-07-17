@@ -11,7 +11,7 @@ function run_one_calc {
         echo "skip $1"
     else
         bash batch_calc.sh $1
-        echo "$1 finished in $SECONDS seconds" >> run_all.log
+        echo "$1 finished; timer = $SECONDS seconds" >> run_all.log
     fi
 }
 

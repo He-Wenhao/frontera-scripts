@@ -3,7 +3,7 @@
 #SBATCH -N 64
 #SBATCH --ntasks-per-node 10
 #SBATCH -A DMR21001
-#SBATCH -p development
+#SBATCH -p normal
 #SBATCH -t 48:00:00        # Run time (hh:mm:ss)
 
 #sbatch -J pt$(basename $(pwd)) parallel_pvtz_plus.sh

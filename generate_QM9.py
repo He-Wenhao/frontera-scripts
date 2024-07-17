@@ -38,6 +38,50 @@ def write_orca_xyz(filename, xyzname ,type_calc):
     
 
     with open(filename,'w') as file:
+        if(type_calc == 'pvtz_DLPNO_CCSD'):
+        
+            file.write('! DLPNO-CCSD cc-pVTZ cc-pVTZ/C RIJCOSX def2/J TIGHTSCF\n');
+            file.write('%maxcore 12000\n');
+            file.write('%pal\n');
+            file.write('nprocs '+str(10)+'\n');
+            file.write('end\n');
+            file.write('! LargePrint KeepDens\n');
+            file.write('%MDCI\n');
+            file.write('maxiter 200\n');
+            file.write('Density linearized\n');
+            file.write('END\n');
+    
+            file.write('%ELPROP\n');
+            file.write('  dipole true\n');
+            file.write('  quadrupole true\n');
+            file.write('END\n');
+    
+            file.write('% OUTPUT\n');
+            file.write('  Print[ P_Density ] 1        # converged density\n');
+            file.write('  Print[ P_KinEn ] 1          # kinetic energy matrix\n');
+            file.write('END\n');
+        if(type_calc == 'pvdz_DLPNO_CCSD'):
+        
+            file.write('! DLPNO-CCSD cc-pVDZ cc-pVDZ/C RIJCOSX def2/J TIGHTSCF\n');
+            file.write('%maxcore 12000\n');
+            file.write('%pal\n');
+            file.write('nprocs '+str(10)+'\n');
+            file.write('end\n');
+            file.write('! LargePrint KeepDens\n');
+            file.write('%MDCI\n');
+            file.write('Density linearized\n');
+            file.write('maxiter 200\n');
+            file.write('END\n');
+    
+            file.write('%ELPROP\n');
+            file.write('  dipole true\n');
+            file.write('  quadrupole true\n');
+            file.write('END\n');
+    
+            file.write('% OUTPUT\n');
+            file.write('  Print[ P_Density ] 1        # converged density\n');
+            file.write('  Print[ P_KinEn ] 1          # kinetic energy matrix\n');
+            file.write('END\n');
         if(type_calc == 'pvtz_DLPNO_CCSDt'):
         
             file.write('! DLPNO-CCSD(T) cc-pVTZ cc-pVTZ/C RIJCOSX def2/J TIGHTSCF\n');
@@ -48,7 +92,6 @@ def write_orca_xyz(filename, xyzname ,type_calc):
             file.write('! LargePrint KeepDens\n');
             file.write('%MDCI\n');
             file.write('maxiter 200\n');
-            file.write('Density linearized\n');
             file.write('END\n');
     
             file.write('%ELPROP\n');
@@ -69,7 +112,6 @@ def write_orca_xyz(filename, xyzname ,type_calc):
             file.write('end\n');
             file.write('! LargePrint KeepDens\n');
             file.write('%MDCI\n');
-            file.write('Density linearized\n');
             file.write('maxiter 200\n');
             file.write('END\n');
     
@@ -220,6 +262,8 @@ if __name__ == '__main__':
     #randomize_namelist()
     make_all_orca_inp_rand(type_calc = 'pvtz_DLPNO_CCSDt')
     make_all_orca_inp_rand(type_calc = 'pvdz_DLPNO_CCSDt')
+    make_all_orca_inp_rand(type_calc = 'pvtz_DLPNO_CCSD')
+    make_all_orca_inp_rand(type_calc = 'pvdz_DLPNO_CCSD')
     #make_all_orca_inp_rand(type_calc = 'pvdz_CCSDt')
     #make_all_orca_inp_rand(type_calc = 'EOM')
     #make_all_orca_inp_rand(type_calc = 'polar')
