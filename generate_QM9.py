@@ -13,6 +13,8 @@ import shutil
 from multiprocessing import Pool
 import random
 import json
+import re
+
 
 def delete_second_line(filename):
     # Read the contents of the file
@@ -26,6 +28,35 @@ def delete_second_line(filename):
     # Write the modified content back to the file
     with open(filename, 'w') as file:
         file.writelines(lines)
+
+
+def convert_star_caret_to_decimal(filename):
+    try:
+        # Open the file and read its contents
+        with open(filename, 'r') as file:
+            content = file.read()
+        
+        # Define the function to replace the pattern with the calculated value
+        def replace_function(match):
+            a = float(match.group(1))
+            b = int(match.group(2))
+            return f'{a * (10 ** b):.10f}'  # Ensure decimal representation with 10 decimal places
+        
+        # Use regex to find patterns and replace them with calculated values
+        modified_content = re.sub(r'([-+]?\d*\.?\d+)\*\^([-+]?\d+)', replace_function, content)
+        
+        # Save the modified contents back to the file or to a new file
+        with open(filename, 'w') as file:
+            file.write(modified_content)
+        
+        print("File has been updated successfully.")
+    except FileNotFoundError:
+        print("The file was not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+
 
 def float1(string):
         try:
@@ -227,6 +258,7 @@ def worker_rand(file_info):
     write_orca_xyz(os.path.join(task, 'run.inp'), file, type_calc)
     shutil.copy(os.path.join('QM9', file), task)
     delete_second_line(os.path.join(task, file))
+    convert_star_caret_to_decimal(os.path.join(task, file))
 
 def make_all_orca_inp_rand(type_calc, path='orca'):
     # Open the JSON file in read mode
