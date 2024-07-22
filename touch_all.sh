@@ -1,0 +1,1 @@
+find . -type f -print0 | xargs -0 -n 1 -P 40 touch
