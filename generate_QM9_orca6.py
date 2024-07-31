@@ -15,19 +15,37 @@ import random
 import json
 import re
 
+# delete secibd line; replace \t with ' '; delete last column
+def process_file(filename):
+    try:
+        # Open the file and read its content
+        with open(filename, 'r') as file:
+            lines = file.readlines()
+       
+        natm = int(lines[0])
 
-def delete_second_line(filename):
-    # Read the contents of the file
-    with open(filename, 'r') as file:
-        lines = file.readlines()
+        modified_lines = []
+        for i, line in enumerate(lines):
+            # Replace tabs with spaces and split the line by spaces
+            elements = line.replace('\t', ' ').split()
+            # Remove the last element
+            if i > 1 and i < natm+2:
+                elements.pop()
+            # Join the elements back with spaces and store the modified line
+            modified_lines.append(' '.join(elements))
+        modified_lines[1] = ''
+        modified_lines = modified_lines[:natm+2]
 
-    # Modify the second line (index 1 in zero-indexed list)
-    if len(lines) > 1:  # Check if there is a second line
-        lines[1] = '\n'
+        # Write the modified content back to the same file
+        with open(filename, 'w') as file:
+            for line in modified_lines:
+                file.write(line+'\n')
 
-    # Write the modified content back to the file
-    with open(filename, 'w') as file:
-        file.writelines(lines)
+        print(f"Successfully processed {filename}.")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
 
 
 def convert_star_caret_to_decimal(filename):
@@ -65,54 +83,10 @@ def float1(string):
             out = 0.;
         return out;
 
-def write_orca_xyz(filename, xyzname ,type_calc):
+def write_orca_xyz(filename, xyzname ,type_calc,charge,multiplicity):
     
 
     with open(filename,'w') as file:
-        if(type_calc == 'pvtz_DLPNO_CCSD'):
-        
-            file.write('! DLPNO-CCSD cc-pVTZ cc-pVTZ/C RIJCOSX def2/J TIGHTSCF\n');
-            file.write('%maxcore 12000\n');
-            file.write('%pal\n');
-            file.write('nprocs '+str(10)+'\n');
-            file.write('end\n');
-            file.write('! LargePrint KeepDens\n');
-            file.write('%MDCI\n');
-            file.write('maxiter 200\n');
-            file.write('Density linearized\n');
-            file.write('END\n');
-    
-            file.write('%ELPROP\n');
-            file.write('  dipole true\n');
-            file.write('  quadrupole true\n');
-            file.write('END\n');
-    
-            file.write('% OUTPUT\n');
-            file.write('  Print[ P_Density ] 1        # converged density\n');
-            file.write('  Print[ P_KinEn ] 1          # kinetic energy matrix\n');
-            file.write('END\n');
-        if(type_calc == 'pvdz_DLPNO_CCSD'):
-        
-            file.write('! DLPNO-CCSD cc-pVDZ cc-pVDZ/C RIJCOSX def2/J TIGHTSCF\n');
-            file.write('%maxcore 12000\n');
-            file.write('%pal\n');
-            file.write('nprocs '+str(10)+'\n');
-            file.write('end\n');
-            file.write('! LargePrint KeepDens\n');
-            file.write('%MDCI\n');
-            file.write('Density linearized\n');
-            file.write('maxiter 200\n');
-            file.write('END\n');
-    
-            file.write('%ELPROP\n');
-            file.write('  dipole true\n');
-            file.write('  quadrupole true\n');
-            file.write('END\n');
-    
-            file.write('% OUTPUT\n');
-            file.write('  Print[ P_Density ] 1        # converged density\n');
-            file.write('  Print[ P_KinEn ] 1          # kinetic energy matrix\n');
-            file.write('END\n');
         if(type_calc == 'pvtz_DLPNO_CCSDt'):
         
             file.write('! DLPNO-CCSD(T) cc-pVTZ cc-pVTZ/C RIJCOSX def2/J TIGHTSCF\n');
@@ -123,6 +97,7 @@ def write_orca_xyz(filename, xyzname ,type_calc):
             file.write('! LargePrint KeepDens\n');
             file.write('%MDCI\n');
             file.write('maxiter 200\n');
+            file.write('Density unrelaxed\n');
             file.write('END\n');
     
             file.write('%ELPROP\n');
@@ -143,6 +118,7 @@ def write_orca_xyz(filename, xyzname ,type_calc):
             file.write('end\n');
             file.write('! LargePrint KeepDens\n');
             file.write('%MDCI\n');
+            file.write('Density unrelaxed\n');
             file.write('maxiter 200\n');
             file.write('END\n');
     
@@ -240,11 +216,11 @@ def write_orca_xyz(filename, xyzname ,type_calc):
     
 
 
-        file.write('* xyzfile 0 1 '+xyzname+'\n');     # * xyzfile 0 2 hydroxide.xyz
+        file.write('* xyzfile '+str(charge) +' '+str(multiplicity)+' '+xyzname+'\n');     # * xyzfile 0 2 hydroxide.xyz
 
 # we put every 1000 datas in a batch
 def worker_rand(file_info):
-    type_calc, path, file, ind = file_info
+    type_calc, path, file, ind, char, mul = file_info
     batch_ind = ind // 1000
     name = os.path.join(path, str(batch_ind), str(ind%1000))
     task = os.path.join(name, type_calc)
@@ -255,25 +231,25 @@ def worker_rand(file_info):
         os.makedirs(task, exist_ok=True)
     print('config:', file)
 
-    write_orca_xyz(os.path.join(task, 'run.inp'), file, type_calc)
+    write_orca_xyz(os.path.join(task, 'run.inp'), file, type_calc,charge=char,multiplicity=mul)
     shutil.copy(os.path.join('QM9', file), task)
-    delete_second_line(os.path.join(task, file))
     convert_star_caret_to_decimal(os.path.join(task, file))
+    process_file(os.path.join(task, file))
 
-def make_all_orca_inp_rand(type_calc, path='orca'):
+def make_all_orca_inp_rand(type_calc,char,mul, path='orca'):
     # Open the JSON file in read mode
     with open('random_namelist.json', 'r') as file:
         # Load the list from the JSON file
         files = json.load(file)
     print('#file:',len(files))
-    #files = files[0:3]
+    #files = files[0:300]
     if not os.path.exists(path):
         os.makedirs(path)
 
     # Create tuples of arguments to pass to the worker function
     file_info_l = []
     for ind, file in enumerate(files):
-        file_info = (type_calc, path, file, ind)
+        file_info = (type_calc, path, file, ind,char,mul)
         file_info_l.append(file_info)
     with Pool() as pool:
         # map the worker function to the files
@@ -292,11 +268,9 @@ def randomize_namelist():
 
 if __name__ == '__main__':
     #randomize_namelist()
-    make_all_orca_inp_rand(type_calc = 'pvtz_DLPNO_CCSDt')
-    make_all_orca_inp_rand(type_calc = 'pvdz_DLPNO_CCSDt')
-    make_all_orca_inp_rand(type_calc = 'pvtz_DLPNO_CCSD')
-    make_all_orca_inp_rand(type_calc = 'pvdz_DLPNO_CCSD')
-    #make_all_orca_inp_rand(type_calc = 'pvdz_CCSDt')
-    #make_all_orca_inp_rand(type_calc = 'EOM')
-    #make_all_orca_inp_rand(type_calc = 'polar')
-    #make_all_orca_inp_rand(type_calc = 'bp86')
+    #make_all_orca_inp_rand(type_calc = 'pvtz_DLPNO_CCSDt',char=0,mul=3)
+    #make_all_orca_inp_rand(type_calc = 'pvdz_DLPNO_CCSDt',char=0,mul=3)
+    make_all_orca_inp_rand(type_calc = 'pvdz_CCSDt',char=0,mul=3)
+    #make_all_orca_inp_rand(type_calc = 'EOM',char=0,mul=3)
+    #make_all_orca_inp_rand(type_calc = 'polar',char=0,mul=3)
+    #make_all_orca_inp_rand(type_calc = 'bp86',char=0,mul=3)

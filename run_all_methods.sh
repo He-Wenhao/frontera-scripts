@@ -18,8 +18,8 @@ function run_one_calc {
 SECONDS=0
 
 run_one_calc bp86
-run_one_calc EOM
-run_one_calc polar
+#run_one_calc EOM
+#run_one_calc polar
 run_one_calc pvdz_CCSDt
 run_one_calc pvdz_DLPNO_CCSDt
 run_one_calc pvtz_DLPNO_CCSDt

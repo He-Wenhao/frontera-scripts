@@ -1,4 +1,4 @@
-#!/bin/bash
+#:!/bin/bash
 #SBATCH -o log-%j
 #SBATCH -N 64
 #SBATCH --ntasks-per-node 10
@@ -14,6 +14,17 @@ pids=()
 
 method_folder=$1
 
+# define environment settings orca and openmpi
+env_settings=$(cat << 'EOF'
+export PATH="/work2/09730/whe1/my_packages/openmpi_4_1_1/bin:$PATH"
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/work2/09730/whe1/my_packages/openmpi_4_1_1/lib
+export OMPI_MCA_btl=^openib
+export ORCA=/work2/09730/whe1/my_packages/orca_6_0_0/orca
+EOF
+)
+
+
+
 for ((i=0; i<$n_proc; i++)); do
     slot_free[$i]=1
 done
@@ -21,11 +32,11 @@ done
 echo "start:"$PATH
 
 tol_start=$SECONDS
-export PATH=$PATH:/work2/09730/whe1/bin
-export LD_LIBRARY_PATH=/work2/09730/whe1/lib
-export OMPI_MCA_btl=^openib
+#export OMPI_MCA_btl=^openib
 #export PMIX_MCA_psec=^munge
 #source ~/.bash_profile
+
+
 
 # Define a function to run and check mpi
 run_orca=$(cat <<'EOF'
@@ -41,7 +52,7 @@ else
     do
         echo $3 >> my_hostfile
     done
-    ssh $3 "  source ~/.bashrc; cd $4; rm /tmp/run.gbw /tmp/*.tmp* /tmp/run.inp /tmp/run.ges; cp run.inp /tmp/run.inp; /work2/09730/whe1/my_packages/orca/orca /tmp/run.inp > /tmp/log '-machinefile my_hostfile -v'; cp /tmp/log log; cp /tmp/run.densities run.densities;cp /tmp/run.properties run.properties; echo 'disk storage'\$( du -sh /tmp 2>/dev/null)"
+    ssh $3 "cd $4; source env_settings.sh; rm /tmp/run.gbw /tmp/*.tmp* /tmp/run.inp /tmp/run.ges; cp run.inp /tmp/run.inp; \$ORCA /tmp/run.inp > /tmp/log '-machinefile my_hostfile -v'; cp /tmp/log log; cp /tmp/run.densities run.densities;cp /tmp/run.properties run.properties; echo 'disk storage'\$( du -sh /tmp 2>/dev/null)"
 fi
 
 sub_duration=$(( SECONDS - sub_start ))
@@ -83,6 +94,7 @@ do
     cd $method_folder
     echo $(pwd)
     echo "$run_orca" > run_orca.sh
+    echo "$env_settings" > env_settings.sh
     #ibrun -n 1 -o $slot_id task_affinity bash run_orca.sh &
     # get host name
     host_name=$(scontrol show hostname $SLURM_NODELIST | sed -n $(expr $slot_id + 1)'p')
