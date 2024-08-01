@@ -96,6 +96,7 @@ def write_orca_xyz(filename, xyzname ,type_calc,charge,multiplicity):
             file.write('end\n');
             file.write('! LargePrint KeepDens\n');
             file.write('%MDCI\n');
+            file.write('ENFORCE_CCSD_DENSITY true\n');
             file.write('maxiter 200\n');
             file.write('Density unrelaxed\n');
             file.write('END\n');
@@ -118,6 +119,7 @@ def write_orca_xyz(filename, xyzname ,type_calc,charge,multiplicity):
             file.write('end\n');
             file.write('! LargePrint KeepDens\n');
             file.write('%MDCI\n');
+            file.write('ENFORCE_CCSD_DENSITY true\n');
             file.write('Density unrelaxed\n');
             file.write('maxiter 200\n');
             file.write('END\n');
